@@ -1,0 +1,36 @@
+# ==================== IDE ====================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# ==================== Build ====================
+target/
+build/
+*.class
+*.jar
+*.war
+
+# ==================== Logs ====================
+*.log
+logs/
+
+# ==================== Node ====================
+node_modules/
+npm-debug.log
+
+# ==================== Sensitive Files ====================
+# IMPORTANT: Contains API keys - NEVER commit!
+loop-ai-backend/src/main/resources/application.properties
+
+# ==================== Environment ====================
+.env
+.env.local
+*.env
+
+# ==================== Temp ====================
+*.tmp
+*.temp
+
