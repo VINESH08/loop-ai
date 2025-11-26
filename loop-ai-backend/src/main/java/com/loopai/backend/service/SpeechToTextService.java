@@ -51,15 +51,16 @@ public class SpeechToTextService {
 
         try {
             // Build Deepgram API URL with parameters
+            // Using Nova-3 for better accuracy and lower latency
             String url = "https://api.deepgram.com/v1/listen?" +
-                    "model=nova-2&" +
+                    "model=nova-3&" +
                     "language=en&" +
                     "punctuate=true&" +
                     "smart_format=true";
 
             log.info("🌐 Calling Deepgram API:");
             log.info("   - URL: {}", url);
-            log.info("   - Model: nova-2");
+            log.info("   - Model: nova-3 (latest)");
 
             // Create request body with audio data
             RequestBody body = RequestBody.create(audioData, MediaType.parse(mimeType));

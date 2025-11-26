@@ -1,6 +1,7 @@
 package com.loopai.backend.controller;
 
 import com.loopai.backend.service.AIAssistantService;
+import com.loopai.backend.service.ElevenLabsTtsService;
 import com.loopai.backend.service.SpeechToTextService;
 import com.loopai.backend.service.TextToSpeechService;
 import com.loopai.backend.service.TwilioService;
@@ -32,6 +33,7 @@ public class VoiceController {
     private final SpeechToTextService speechToTextService;
     private final AIAssistantService aiAssistantService;
     private final TextToSpeechService textToSpeechService;
+    private final ElevenLabsTtsService elevenLabsTtsService;
     private final TwilioService twilioService;
 
     @Value("${tts.voice:alloy}")
@@ -101,12 +103,22 @@ public class VoiceController {
                 aiAssistantService.clearMemory(odId);
             }
 
-            // Step 3: Text-to-Speech (OpenAI TTS) - use configured voice
+            // Step 3: Text-to-Speech (ElevenLabs Turbo if enabled, else OpenAI TTS)
             stepStart = System.currentTimeMillis();
-            log.info("Step 3: Converting response to speech with voice: {}", ttsVoice);
-            byte[] audioResponse = textToSpeechService.synthesize(aiResponse, ttsVoice, "tts-1");
+            byte[] audioResponse;
+            String ttsProvider;
+
+            if (elevenLabsTtsService.isEnabled()) {
+                log.info("Step 3: Converting response to speech with ElevenLabs Turbo...");
+                audioResponse = elevenLabsTtsService.synthesize(aiResponse);
+                ttsProvider = "ElevenLabs";
+            } else {
+                log.info("Step 3: Converting response to speech with OpenAI TTS, voice: {}", ttsVoice);
+                audioResponse = textToSpeechService.synthesize(aiResponse, ttsVoice, "tts-1");
+                ttsProvider = "OpenAI";
+            }
             long ttsTime = System.currentTimeMillis() - stepStart;
-            log.info("⏱️ LOG TIME: LLM Response → OpenAI TTS = {}ms", ttsTime);
+            log.info("⏱️ LOG TIME: LLM Response → {} TTS = {}ms", ttsProvider, ttsTime);
 
             long totalTime = System.currentTimeMillis() - pipelineStart;
             log.info("========================================");
@@ -123,6 +135,7 @@ public class VoiceController {
             headers.setContentType(MediaType.valueOf("audio/mpeg"));
             headers.set("X-Transcript", sanitizeForHeader(transcribedText));
             headers.set("X-Response-Text", sanitizeForHeader(aiResponse));
+            headers.set("X-Time-Taken", String.valueOf(totalTime)); // Time in ms
             headers.set("X-Voice-Id", ttsVoice);
             headers.set("X-Forwarded-To-Human", String.valueOf(forwardToHuman));
             headers.setContentLength(audioResponse.length);
@@ -260,21 +273,29 @@ public class VoiceController {
 
     /**
      * Get intro audio for Loop AI greeting
-     * Frontend should cache this with the voice ID and re-fetch if voice changes
+     * Uses ElevenLabs if enabled, otherwise OpenAI TTS
      */
     @GetMapping(value = "/intro", produces = "audio/mpeg")
     public ResponseEntity<byte[]> getIntroAudio() {
         try {
-            log.info("Generating intro audio with voice: {}", ttsVoice);
+            byte[] audio;
+            String provider;
 
-            byte[] audio = textToSpeechService.synthesize(introMessage, ttsVoice, "tts-1");
+            if (elevenLabsTtsService.isEnabled()) {
+                log.info("Generating intro audio with ElevenLabs...");
+                audio = elevenLabsTtsService.synthesize(introMessage);
+                provider = "ElevenLabs";
+            } else {
+                log.info("Generating intro audio with OpenAI TTS, voice: {}", ttsVoice);
+                audio = textToSpeechService.synthesize(introMessage, ttsVoice, "tts-1");
+                provider = "OpenAI";
+            }
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.valueOf("audio/mpeg"));
-            headers.set("X-Voice-Id", ttsVoice); // Frontend uses this to detect voice changes
+            headers.set("X-TTS-Provider", provider);
             headers.set("X-Intro-Text", sanitizeForHeader(introMessage));
             headers.setContentLength(audio.length);
-            // Allow caching for 1 hour
             headers.setCacheControl("public, max-age=3600");
 
             return new ResponseEntity<>(audio, headers, HttpStatus.OK);

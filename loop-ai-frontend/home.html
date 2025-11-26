@@ -209,6 +209,12 @@
             color: white;
             border-bottom-right-radius: 4px;
         }
+        .msg-time {
+            font-size: 0.65rem;
+            color: #aaa;
+            margin-top: 4px;
+            font-style: italic;
+        }
 
         /* Mic Bar */
         .mic-bar {
@@ -343,9 +349,28 @@
         const toast = new bootstrap.Toast(document.getElementById('toast'));
 
         let user = { name: 'You', pic: null };
-        const intro = new Audio('intro.mp3');
+        let introAudio = null;
+        let introText = "Hi, this is Loop AI. How can I assist you today?";
         let recorder, chunks = [], recording = false, processing = false, forwarded = false;
         let chatStarted = false;
+
+        // Fetch intro audio from backend (uses same ElevenLabs voice as responses)
+        async function loadIntroAudio() {
+            try {
+                const response = await fetch(`${API}/api/voice/intro`, { credentials: 'include' });
+                if (response.ok) {
+                    const blob = await response.blob();
+                    introAudio = new Audio(URL.createObjectURL(blob));
+                    // Get intro text from header if available
+                    const headerText = response.headers.get('X-Intro-Text');
+                    if (headerText) introText = headerText;
+                    console.log('Intro audio loaded from backend');
+                }
+            } catch (e) {
+                console.log('Using fallback intro.mp3');
+                introAudio = new Audio('intro.mp3');
+            }
+        }
 
         // Switch to chat view
         function showChatView() {
@@ -355,8 +380,10 @@
         }
 
         async function playIntro() {
-            addMsg("Hi, this is Loop AI. How can I assist you today?", 'bot');
-            await new Promise(r => { intro.play(); intro.onended = r; });
+            addMsg(introText, 'bot');
+            if (introAudio) {
+                await new Promise(r => { introAudio.play(); introAudio.onended = r; });
+            }
         }
 
         async function initMic() {
@@ -428,10 +455,13 @@
 
                 const t = res.headers.get('X-Transcript');
                 const r = res.headers.get('X-Response-Text');
+                const timeTaken = res.headers.get('X-Time-Taken'); // Time in ms
 
                 if (t) addMsg(t, 'user');
                 if (r) {
-                    addMsg(r, 'bot');
+                    // Convert ms to seconds for display
+                    const timeInSec = timeTaken ? (parseInt(timeTaken) / 1000).toFixed(1) : null;
+                    addMsg(r, 'bot', timeInSec);
                     if (r.toLowerCase().includes('forwarding') && r.toLowerCase().includes('human')) {
                         forwarded = true;
                         micBtn.disabled = true;
@@ -451,7 +481,7 @@
             }
         }
 
-        function addMsg(text, type) {
+        function addMsg(text, type, timeSec = null) {
             const row = document.createElement('div');
             row.className = `msg-row ${type}`;
 
@@ -461,11 +491,17 @@
                     ? `<div class="avatar user-av"><img src="${user.pic}"></div>`
                     : `<div class="avatar bot"><i class="bi bi-person"></i></div>`;
 
+            // Show time only for bot messages
+            const timeHtml = (type === 'bot' && timeSec) 
+                ? `<div class="msg-time">TimeTaken: ${timeSec}s</div>` 
+                : '';
+
             row.innerHTML = `
                 ${av}
                 <div class="msg-content">
                     <div class="msg-name">${type === 'bot' ? 'Loop AI' : user.name}</div>
                     <div class="bubble">${text}</div>
+                    ${timeHtml}
                 </div>
             `;
             messages.appendChild(row);
@@ -522,6 +558,9 @@
                     img.style.display = 'block';
                 }
 
+                // Load intro audio (same voice as TTS responses)
+                await loadIntroAudio();
+                
                 await initMic();
             } catch (e) {
                 location.href = 'index.html';

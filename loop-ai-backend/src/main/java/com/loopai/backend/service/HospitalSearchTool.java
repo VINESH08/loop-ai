@@ -70,6 +70,32 @@ public class HospitalSearchTool {
         return buildSearchResultsResponse(results, query, city);
     }
 
+    @Tool("Find which city a hospital is in. ONLY use when user explicitly asks 'Which city is X in?' or 'In which city is X located?' - NOT for address requests.")
+    public String findHospitalLocation(
+            @P("The name of the hospital to find") String hospitalName) {
+
+        log.info("========================================");
+        log.info("📍 RAG TOOL: findHospitalLocation");
+        log.info("   Hospital: \"{}\"", hospitalName);
+        log.info("========================================");
+
+        Map<String, List<Hospital>> hospitalsByCity = vectorStoreService
+                .findHospitalsByNameGroupedByCity(hospitalName);
+
+        if (hospitalsByCity.isEmpty()) {
+            return String.format("I dont have '%s' in my database.", hospitalName);
+        }
+
+        if (hospitalsByCity.size() == 1) {
+            String city = hospitalsByCity.keySet().iterator().next();
+            return String.format("%s is located in %s.", hospitalName, city);
+        }
+
+        // Multiple cities - just list the cities, don't give details
+        String cities = String.join(", ", hospitalsByCity.keySet());
+        return String.format("'%s' exists in multiple cities: %s. Which city do you need?", hospitalName, cities);
+    }
+
     @Tool("Confirm if a specific hospital exists in the network. Use this when user asks questions like 'Is X hospital in my network?' or 'Can you confirm if Y hospital in Z city is covered?'")
     public String confirmHospitalInNetwork(
             @P("The exact or partial name of the hospital to confirm") String hospitalName,

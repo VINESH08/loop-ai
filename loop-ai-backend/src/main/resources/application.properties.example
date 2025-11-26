@@ -50,7 +50,15 @@ csv.mapping.name-column=HOSPITAL NAME
 csv.mapping.city-column=CITY
 csv.mapping.address-column=Address
 
-# ==================== TTS Voice Configuration ====================
+# ==================== ElevenLabs TTS Configuration (FAST!) ====================
+# Get your API key from: https://elevenlabs.io/
+# Uses Turbo v2.5 model for ~50% faster TTS than OpenAI
+elevenlabs.api.key=YOUR_ELEVENLABS_API_KEY
+# Voice IDs: Rachel=21m00Tcm4TlvDq8ikWAM, Adam=pNInz6obpgDQGcFmaJgB
+elevenlabs.voice.id=21m00Tcm4TlvDq8ikWAM
+
+# ==================== OpenAI TTS Configuration (Fallback) ====================
+# Used only if ElevenLabs is not configured
 tts.voice=alloy
 tts.intro.message=Hi, this is Loop AI. How can I assist you today?
 

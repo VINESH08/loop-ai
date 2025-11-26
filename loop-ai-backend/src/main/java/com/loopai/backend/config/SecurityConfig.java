@@ -54,7 +54,8 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(
-                List.of("X-Transcript", "X-Response-Text", "X-Voice-Id", "X-Intro-Text", "X-Forwarded-To-Human"));
+                List.of("X-Transcript", "X-Response-Text", "X-Time-Taken", "X-Voice-Id", "X-Intro-Text",
+                        "X-Forwarded-To-Human"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

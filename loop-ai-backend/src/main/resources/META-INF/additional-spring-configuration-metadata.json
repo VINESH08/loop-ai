@@ -98,9 +98,20 @@
       "description": "CSV column name for pincode"
     },
     {
+      "name": "elevenlabs.api.key",
+      "type": "java.lang.String",
+      "description": "ElevenLabs API key for ultra-fast TTS (get from elevenlabs.io)"
+    },
+    {
+      "name": "elevenlabs.voice.id",
+      "type": "java.lang.String",
+      "description": "ElevenLabs voice ID (Rachel=21m00Tcm4TlvDq8ikWAM, Adam=pNInz6obpgDQGcFmaJgB)",
+      "defaultValue": "21m00Tcm4TlvDq8ikWAM"
+    },
+    {
       "name": "tts.voice",
       "type": "java.lang.String",
-      "description": "OpenAI TTS voice (alloy, echo, fable, onyx, nova, shimmer)",
+      "description": "OpenAI TTS voice fallback (alloy, echo, fable, onyx, nova, shimmer)",
       "defaultValue": "alloy"
     },
     {
