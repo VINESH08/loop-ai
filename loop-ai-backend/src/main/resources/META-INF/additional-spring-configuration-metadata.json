@@ -1,0 +1,139 @@
+{
+  "properties": [
+    {
+      "name": "deepgram.api.key",
+      "type": "java.lang.String",
+      "description": "Deepgram API key for Speech-to-Text service"
+    },
+    {
+      "name": "openai.api.key",
+      "type": "java.lang.String",
+      "description": "OpenAI API key for GPT-4o-mini and TTS services"
+    },
+    {
+      "name": "groq.api.key",
+      "type": "java.lang.String",
+      "description": "Groq API key for ultra-fast LLM inference (FREE at console.groq.com)"
+    },
+    {
+      "name": "groq.model.name",
+      "type": "java.lang.String",
+      "description": "Groq model: llama-3.3-70b-versatile (best), llama-3.1-8b-instant (fastest), mixtral-8x7b-32768",
+      "defaultValue": "llama-3.3-70b-versatile"
+    },
+    {
+      "name": "groq.temperature",
+      "type": "java.lang.Double",
+      "description": "Groq LLM temperature (0.0-1.0, lower = more deterministic)",
+      "defaultValue": 0.1
+    },
+    {
+      "name": "groq.max-tokens",
+      "type": "java.lang.Integer",
+      "description": "Maximum tokens in Groq response",
+      "defaultValue": 150
+    },
+    {
+      "name": "chroma.host",
+      "type": "java.lang.String",
+      "description": "ChromaDB server host",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "chroma.port",
+      "type": "java.lang.Integer",
+      "description": "ChromaDB server port",
+      "defaultValue": 8000
+    },
+    {
+      "name": "chroma.collection",
+      "type": "java.lang.String",
+      "description": "ChromaDB collection name for hospital embeddings",
+      "defaultValue": "hospitals"
+    },
+    {
+      "name": "csv.mapping.file-path",
+      "type": "java.lang.String",
+      "description": "Path to the hospital CSV file",
+      "defaultValue": "classpath:data/hospitals.csv"
+    },
+    {
+      "name": "csv.mapping.name-column",
+      "type": "java.lang.String",
+      "description": "CSV column name for hospital name"
+    },
+    {
+      "name": "csv.mapping.city-column",
+      "type": "java.lang.String",
+      "description": "CSV column name for city"
+    },
+    {
+      "name": "csv.mapping.address-column",
+      "type": "java.lang.String",
+      "description": "CSV column name for address"
+    },
+    {
+      "name": "csv.mapping.state-column",
+      "type": "java.lang.String",
+      "description": "CSV column name for state"
+    },
+    {
+      "name": "csv.mapping.phone-column",
+      "type": "java.lang.String",
+      "description": "CSV column name for phone number"
+    },
+    {
+      "name": "csv.mapping.specialties-column",
+      "type": "java.lang.String",
+      "description": "CSV column name for specialties"
+    },
+    {
+      "name": "csv.mapping.type-column",
+      "type": "java.lang.String",
+      "description": "CSV column name for network type"
+    },
+    {
+      "name": "csv.mapping.pincode-column",
+      "type": "java.lang.String",
+      "description": "CSV column name for pincode"
+    },
+    {
+      "name": "tts.voice",
+      "type": "java.lang.String",
+      "description": "OpenAI TTS voice (alloy, echo, fable, onyx, nova, shimmer)",
+      "defaultValue": "alloy"
+    },
+    {
+      "name": "tts.intro.message",
+      "type": "java.lang.String",
+      "description": "Introduction message spoken by Loop AI",
+      "defaultValue": "Hi, this is Loop AI. How can I assist you today?"
+    },
+    {
+      "name": "twilio.account.sid",
+      "type": "java.lang.String",
+      "description": "Twilio Account SID for SMS/Voice API"
+    },
+    {
+      "name": "twilio.auth.token",
+      "type": "java.lang.String",
+      "description": "Twilio Auth Token for SMS/Voice API"
+    },
+    {
+      "name": "twilio.phone.number",
+      "type": "java.lang.String",
+      "description": "Twilio phone number (sender) for SMS/Voice"
+    },
+    {
+      "name": "twilio.human.agent.number",
+      "type": "java.lang.String",
+      "description": "Human agent phone number to receive forwarded calls/SMS"
+    },
+    {
+      "name": "twilio.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable Twilio integration",
+      "defaultValue": false
+    }
+  ]
+}
