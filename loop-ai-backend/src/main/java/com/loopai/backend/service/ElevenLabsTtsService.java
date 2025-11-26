@@ -30,11 +30,11 @@ public class ElevenLabsTtsService {
     public ElevenLabsTtsService(
             @Value("${elevenlabs.api.key:}") String apiKey,
             @Value("${elevenlabs.voice.id:21m00Tcm4TlvDq8ikWAM}") String voiceId) {
-        
+
         this.apiKey = apiKey;
         this.voiceId = voiceId;
         this.enabled = apiKey != null && !apiKey.isEmpty() && !apiKey.equals("YOUR_ELEVENLABS_API_KEY");
-        
+
         this.httpClient = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
@@ -64,7 +64,8 @@ public class ElevenLabsTtsService {
      */
     public byte[] synthesize(String text) {
         if (!enabled) {
-            throw new IllegalStateException("ElevenLabs TTS is not configured. Set elevenlabs.api.key in application.properties");
+            throw new IllegalStateException(
+                    "ElevenLabs TTS is not configured. Set elevenlabs.api.key in application.properties");
         }
 
         log.info("========================================");
@@ -79,17 +80,17 @@ public class ElevenLabsTtsService {
 
             // Request body with turbo model for low latency
             String jsonBody = String.format("""
-                {
-                    "text": "%s",
-                    "model_id": "eleven_turbo_v2_5",
-                    "voice_settings": {
-                        "stability": 0.5,
-                        "similarity_boost": 0.75,
-                        "style": 0.0,
-                        "use_speaker_boost": true
+                    {
+                        "text": "%s",
+                        "model_id": "eleven_turbo_v2_5",
+                        "voice_settings": {
+                            "stability": 0.5,
+                            "similarity_boost": 0.75,
+                            "style": 0.0,
+                            "use_speaker_boost": true
+                        }
                     }
-                }
-                """, escapeJson(text));
+                    """, escapeJson(text));
 
             RequestBody body = RequestBody.create(jsonBody, MediaType.parse("application/json"));
 
@@ -101,12 +102,12 @@ public class ElevenLabsTtsService {
                     .post(body)
                     .build();
 
-            log.info("📤 Sending request to ElevenLabs...");
+            log.info("Sending request to ElevenLabs...");
             long startTime = System.currentTimeMillis();
 
             try (Response response = httpClient.newCall(request).execute()) {
                 long duration = System.currentTimeMillis() - startTime;
-                log.info("📥 Response received in {} ms", duration);
+                log.info(" Response received in {} ms", duration);
 
                 if (!response.isSuccessful()) {
                     String errorBody = response.body() != null ? response.body().string() : "No error details";
@@ -143,4 +144,3 @@ public class ElevenLabsTtsService {
                 .replace("\t", "\\t");
     }
 }
-

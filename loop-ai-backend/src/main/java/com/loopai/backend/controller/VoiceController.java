@@ -79,7 +79,8 @@ public class VoiceController {
                         "error", "Could not transcribe audio. Please speak clearly and try again."));
             }
 
-            // Step 2: Process with LLM (GPT-4o-mini via LangChain4j) - with user's memory
+            // Step 2: Process with LLM (Groq llama-3.1-70b-versatile via openai-compatible
+            // endpoint) - with user's memory
             stepStart = System.currentTimeMillis();
             log.info("Step 2: Processing with AI assistant for user: {}...", odId);
             String aiResponse = aiAssistantService.chat(odId, transcribedText);
@@ -237,21 +238,21 @@ public class VoiceController {
             log.info("   - Is empty: {}", audioFile.isEmpty());
 
             if (audioFile.isEmpty()) {
-                log.error("❌ Audio file is empty!");
+                log.error("Audio file is empty!");
                 return ResponseEntity.badRequest().body(Map.of(
                         "success", false,
                         "error", "Audio file is empty"));
             }
 
             // Call Deepgram STT
-            log.info("🎤 Calling SpeechToTextService...");
+            log.info(" Calling SpeechToTextService...");
             String transcript = speechToTextService.transcribe(
                     audioFile.getBytes(),
                     audioFile.getContentType());
 
             log.info("========================================");
-            log.info("✅ TEST STT COMPLETE");
-            log.info("📝 Final transcript: \"{}\"", transcript);
+            log.info(" TEST STT COMPLETE");
+            log.info(" Final transcript: \"{}\"", transcript);
             log.info("========================================");
 
             return ResponseEntity.ok(Map.of(
@@ -262,7 +263,7 @@ public class VoiceController {
 
         } catch (Exception e) {
             log.error("========================================");
-            log.error("❌ TEST STT FAILED: {}", e.getMessage());
+            log.error("TEST STT FAILED: {}", e.getMessage());
             log.error("========================================", e);
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(

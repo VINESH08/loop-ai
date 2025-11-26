@@ -23,7 +23,7 @@ public class HospitalSearchTool {
 
     private final HospitalVectorStoreService vectorStoreService;
 
-    @Tool("Search for hospitals using semantic search. Use this for general queries like 'find hospitals near me' or 'hospitals with cardiology'. Returns relevant hospitals based on the query context.")
+    @Tool("Search for hospitals using VECTOR SIMILARITY search. Use this for general queries like 'find hospitals near me' or 'hospitals with cardiology'. Returns semantically relevant hospitals based on meaning, not just keywords.")
     public String searchHospitals(
             @P("The search query describing what kind of hospital or service the user is looking for") String query,
             @P("Optional: specific city to filter results. Leave empty for all cities") String city,
@@ -32,10 +32,11 @@ public class HospitalSearchTool {
         long toolStart = System.currentTimeMillis();
 
         log.info("========================================");
-        log.info("🔍 RAG TOOL: searchHospitals");
+        log.info("🔍 RAG TOOL: searchHospitals (VECTOR SIMILARITY)");
         log.info("   Query: \"{}\"", query);
         log.info("   City: \"{}\"", city);
         log.info("   Max Results: {}", maxResults);
+        log.info("   Vector Search Enabled: {}", vectorStoreService.isVectorSearchEnabled());
         log.info("========================================");
 
         if (maxResults <= 0)
@@ -44,23 +45,19 @@ public class HospitalSearchTool {
         List<Hospital> results;
         long ragStart = System.currentTimeMillis();
 
-        // If city is specified, do filtered search
+        // If city is specified, use vector search with city filter
         if (city != null && !city.isEmpty()) {
-            results = vectorStoreService.exactSearch(query, city, maxResults);
-
-            // If no results with exact city, try semantic search
-            if (results.isEmpty()) {
-                results = vectorStoreService.semanticSearch(query + " in " + city, maxResults);
-            }
+            // Use semantic search with city filtering
+            results = vectorStoreService.semanticSearchWithCity(query, city, maxResults);
         } else {
-            // Semantic search for general queries
+            // Pure semantic search - finds similar meanings!
             results = vectorStoreService.semanticSearch(query, maxResults);
         }
 
         long ragTime = System.currentTimeMillis() - ragStart;
         long totalToolTime = System.currentTimeMillis() - toolStart;
 
-        log.info("⏱️ LOG TIME: RAG Search (Vector Store) = {}ms", ragTime);
+        log.info("⏱️ LOG TIME: RAG Vector Search = {}ms", ragTime);
         log.info("⏱️ LOG TIME: Tool Total = {}ms", totalToolTime);
 
         if (results.isEmpty()) {

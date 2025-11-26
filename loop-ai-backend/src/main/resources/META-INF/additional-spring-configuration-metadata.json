@@ -52,6 +52,12 @@
       "defaultValue": "hospitals"
     },
     {
+      "name": "vector.search.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable ChromaDB vector similarity search. When false, falls back to keyword matching.",
+      "defaultValue": true
+    },
+    {
       "name": "csv.mapping.file-path",
       "type": "java.lang.String",
       "description": "Path to the hospital CSV file",

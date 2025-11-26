@@ -56,14 +56,19 @@
 		</dependency>
 		<!-- Note: Groq uses OpenAI-compatible API, so we use langchain4j-open-ai -->
 		
-		<!-- LangChain4j Embeddings (In-Memory store included in base langchain4j) -->
-		<!-- ChromaDB support can be added later if needed:
+		<!-- ChromaDB Vector Store for RAG -->
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j-chroma</artifactId>
 			<version>${langchain4j.version}</version>
 		</dependency>
-		-->
+		
+		<!-- LangChain4j Embedding Store (In-Memory fallback) -->
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
+			<version>${langchain4j.version}</version>
+		</dependency>
 		
 		<!-- CSV Parser -->
 		<dependency>
