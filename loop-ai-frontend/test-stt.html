@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Deepgram STT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">🧪 Test Deepgram Speech-to-Text</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Click record, speak, then click stop. Check backend console for logs!</p>
+                        
+                        <!-- Controls -->
+                        <div class="text-center mb-4">
+                            <button id="recordBtn" class="btn btn-success btn-lg me-2">
+                                🎤 Start Recording
+                            </button>
+                            <button id="stopBtn" class="btn btn-danger btn-lg" disabled>
+                                ⏹️ Stop & Send
+                            </button>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="alert alert-info" id="status">
+                            Ready to record...
+                        </div>
+
+                        <!-- Result -->
+                        <div id="resultSection" style="display: none;">
+                            <h5>Result:</h5>
+                            <pre id="result" class="bg-dark text-white p-3 rounded"></pre>
+                        </div>
+
+                        <!-- Logs -->
+                        <div class="mt-4">
+                            <h5>Frontend Logs:</h5>
+                            <pre id="logs" class="bg-secondary text-white p-3 rounded" style="max-height: 300px; overflow-y: auto;"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+        let mediaRecorder;
+        let audioChunks = [];
+
+        const recordBtn = document.getElementById('recordBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const status = document.getElementById('status');
+        const result = document.getElementById('result');
+        const resultSection = document.getElementById('resultSection');
+        const logs = document.getElementById('logs');
+
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            logs.textContent += `[${time}] ${msg}\n`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(msg);
+        }
+
+        // Initialize
+        async function init() {
+            try {
+                log('Requesting microphone access...');
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                log('✅ Microphone access granted');
+                
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                log(`MediaRecorder created with mimeType: ${mediaRecorder.mimeType}`);
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        audioChunks.push(e.data);
+                        log(`Audio chunk received: ${e.data.size} bytes`);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    log('Recording stopped, preparing audio...');
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    log(`Audio blob created: ${audioBlob.size} bytes`);
+                    audioChunks = [];
+                    await sendToBackend(audioBlob);
+                };
+
+                recordBtn.disabled = false;
+                status.textContent = 'Ready to record!';
+                status.className = 'alert alert-success';
+                
+            } catch (err) {
+                log(`❌ Error: ${err.message}`);
+                status.textContent = 'Microphone access denied!';
+                status.className = 'alert alert-danger';
+            }
+        }
+
+        // Record
+        recordBtn.addEventListener('click', () => {
+            audioChunks = [];
+            mediaRecorder.start();
+            log('🎤 Recording started...');
+            status.textContent = '🔴 Recording... Speak now!';
+            status.className = 'alert alert-danger';
+            recordBtn.disabled = true;
+            stopBtn.disabled = false;
+        });
+
+        // Stop
+        stopBtn.addEventListener('click', () => {
+            mediaRecorder.stop();
+            log('⏹️ Stop button clicked');
+            status.textContent = '📤 Sending to backend...';
+            status.className = 'alert alert-warning';
+            recordBtn.disabled = true;
+            stopBtn.disabled = true;
+        });
+
+        // Send to backend
+        async function sendToBackend(audioBlob) {
+            try {
+                log(`📤 Sending audio to ${API_BASE_URL}/api/voice/test-stt`);
+                log(`   Size: ${audioBlob.size} bytes`);
+                log(`   Type: ${audioBlob.type}`);
+
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'test-recording.webm');
+
+                const response = await fetch(`${API_BASE_URL}/api/voice/test-stt`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                log(`📥 Response status: ${response.status}`);
+                
+                const data = await response.json();
+                log(`📄 Response data: ${JSON.stringify(data, null, 2)}`);
+
+                resultSection.style.display = 'block';
+                result.textContent = JSON.stringify(data, null, 2);
+
+                if (data.success) {
+                    status.textContent = `✅ Success! Transcript: "${data.transcript}"`;
+                    status.className = 'alert alert-success';
+                } else {
+                    status.textContent = `❌ Error: ${data.error}`;
+                    status.className = 'alert alert-danger';
+                }
+
+            } catch (err) {
+                log(`❌ Fetch error: ${err.message}`);
+                status.textContent = `❌ Network error: ${err.message}`;
+                status.className = 'alert alert-danger';
+            } finally {
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
+
