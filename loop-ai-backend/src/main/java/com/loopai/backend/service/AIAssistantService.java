@@ -45,8 +45,7 @@ public class AIAssistantService {
 
     private HospitalAssistant assistant;
 
-    // Caffeine cache with automatic expiry - memory freed after 30 min of
-    // inactivity
+    // Caffeine cache with automatic expiry - memory freed after 30 min of inactivee
     private final Cache<String, MessageWindowChatMemory> userMemories = Caffeine.newBuilder()
             .expireAfterAccess(30, TimeUnit.MINUTES) // Expire after 30 min of no activity
             .maximumSize(1000) // Max 1000 concurrent users
@@ -64,7 +63,8 @@ public class AIAssistantService {
     interface HospitalAssistant {
         @SystemMessage("""
                 You are Loop AI. Brief responses only. No emojis.
-
+                dont consider the name of the hospital in sematic way thats actually matches in the document and give the result,
+                match the name of the hospital if its present
                 TOOL SELECTION:
                 - For ADDRESS requests ("give me address of X") = Use getHospitalDetails
                 - For "which city is X in?" = Use findHospitalLocation
@@ -77,7 +77,7 @@ public class AIAssistantService {
                 Do NOT list all cities with details. Just ask which city.
 
                 RULES:
-                1. ONLY use data from tool responses. NEVER invent hospital names.
+                1. Just be strict to the data set of the files thats added to you and don't refer outside of it.
                 2. If tool says "not found" = Say "I dont have that hospital"
                 3. Keep responses under 50 words
                 4. Pass tool's clarification questions directly to user
@@ -119,7 +119,7 @@ public class AIAssistantService {
                     .maxTokens(150)
                     .build();
             modelDescription = "OpenAI GPT-4o-mini (fallback)";
-            log.warn("⚠️ Groq API key not configured, using OpenAI as fallback");
+            log.warn("Groq API key not configured, using OpenAI as fallback");
         }
 
         // ChatMemoryProvider creates separate memory for each user (with auto-expiry)

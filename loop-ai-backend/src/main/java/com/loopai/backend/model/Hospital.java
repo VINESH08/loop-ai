@@ -63,7 +63,8 @@ public class Hospital {
     }
 
     /**
-     * Create a formatted response string for the user (no emojis for LLM compatibility)
+     * Create a formatted response string for the user (no emojis for LLM
+     * compatibility)
      */
     public String toResponseString() {
         StringBuilder sb = new StringBuilder();

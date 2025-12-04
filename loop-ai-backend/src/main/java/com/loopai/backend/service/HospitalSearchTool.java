@@ -23,9 +23,9 @@ public class HospitalSearchTool {
 
     private final HospitalVectorStoreService vectorStoreService;
 
-    @Tool("Search for hospitals using VECTOR SIMILARITY search. Use this for general queries like 'find hospitals near me' or 'hospitals with cardiology'. Returns semantically relevant hospitals based on meaning, not just keywords.")
+    @Tool("Search for excat hospitals dont go with semantic search")
     public String searchHospitals(
-            @P("The search query describing what kind of hospital or service the user is looking for") String query,
+            @P("The search query describing what kind of excat hospital or service the user is looking for") String query,
             @P("Optional: specific city to filter results. Leave empty for all cities") String city,
             @P("Maximum number of results to return, default 5") int maxResults) {
 
